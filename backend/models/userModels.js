@@ -27,4 +27,4 @@ const userSchema = new mongoose.Schema({
 },{timestamps:true} )   // It will automatically create createdAt and updatedAt fields
 
 export const User = mongoose.model("User", userSchema);  // Registers a model named "User" Internally creates a MongoDB collection:
-                                                         //  export 'User' is used to export it with 'User' name
+// //  export 'User' is used to export it with 'User' name

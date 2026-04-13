@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { verifyEmail } from "../emailVerify/verifyEmail.js";
 import { Session } from "../models/sessionModels.js";
 import 'dotenv/config';
+import { sendOTPMail } from "../emailVerify/sendOTPMail.js";
 
 export const register = async(req,res)=>{
   try{
@@ -180,7 +181,7 @@ export const login = async (req,res) => {
     // check for existing session and delete it before creating a new one
     const existingSession = await Session.findOne({userId:existingUser._id});
     if(existingSession){
-      await Session.findByIdAndDelete({userId:existingUser._id});
+      await Session.findByIdAndDelete(existingSession._id);
     }
 
     // create a new Session
@@ -202,14 +203,215 @@ export const login = async (req,res) => {
   }
 }
 
-export const logout = async (req,res) => {
-  try{
+export const logout = async (req, res) => {
+  try {
     const userId = req.id;
+
+    const sessionResult = await Session.deleteMany({ userId });
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isLoggedIn: false },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    if (sessionResult.deletedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No active session found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged out successfully"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error in logging out user: ${error.message}`
+    });
   }
-  catch(error){
-    res.status(500).json({
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // Set OTP expiry time to 10 minutes from now
+
+    await user.save();
+
+    await sendOTPMail(otp, email);
+
+
+    return res.status(200).json({
+      success: true,
+      message: "otp sent to email successfully"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error in forgot password: ${error.message}`
+    });
+  }
+};
+
+export const verifyOTP = async (req,res) => {
+    try {
+    const { otp } = req.body;
+    const email = req.params.email;
+
+    if(!otp){
+      return res.status(400).json({
+        success:false,
+        message:"OTP is required"
+      })
+    }
+    const user = await User.findOne({ email });
+    if(!user){
+      return res.status(404).json({
+        success:false,
+        message:"User not found"
+      })
+    }
+    if(!(user.otp && user.otpExpiry)){
+      return res.status(400).json({
+        success:false,
+        message:"OTP is already used or not generated"
+      })
+    }
+
+    if(user.otpExpiry < new Date()){
+      return res.status(400).json({
+        success:false,
+        message:"OTP has expired please request a new one"
+      })
+    }
+
+    if(user.otp !== otp){
+      return res.status(400).json({
+        success:false,
+        message:"Invalid OTP"
+      })
+    }
+
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+
+    return res.status(200).json({
+      success:true,
+      message:"OTP verified successfully"
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error in verifying OTP: ${error.message}`
+    });
+  } 
+}
+
+export const changePassword = async (req,res) => {
+  try {
+    const { newPassword , confirmPassword } = req.body;
+    const email = req.params.email;
+    
+    const user = await User.findOne({email});
+    if(!user){
+      return res.status(404).json({
+        success:false,
+        message:"User not found"
+      })
+    }
+
+    if(!newPassword || !confirmPassword){
+      return res.status(400).json({
+        success: false,
+        message: "Both new password and confirm password are required"
+      });
+    }
+
+    if(newPassword !== confirmPassword){
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+
+  }catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error in changing password: ${error.message}`
+    });
+  }
+}
+
+export const allUser = async (req,res) => {
+  try {
+    const users = await User.find({});
+    return res.status(200).json({
+      success: true,
+      users
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Error in fetching users: ${error.message}`
+    });
+  }
+}
+
+export const getUserById = async(req,res) => {
+  try{
+    const {userId} = req.params;
+    const user = await User.findById(userId).select("-password -token -otp -otpExpiry");
+    if(!user){
+      return res.status(404).json({
+        success:false,
+        message:"User not found"
+      })
+    }
+    return res.status(200).json({
+      success:true,
+      user
+    })
+
+
+  } catch(error){
+    return res.status(500).json({
       success:false,
-      message:`Error in logging out user: ${error.message}`
+      message:`Error in fetching user: ${error.message}`
     })
   }
 }
+
+

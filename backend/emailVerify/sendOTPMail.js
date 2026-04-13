@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
-const verifyEmail = async (token, email) => {
+const sendOTPMail = async (otp, email) => {
   try {
     let mailTransporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
@@ -16,16 +16,16 @@ const verifyEmail = async (token, email) => {
     let mailDetails = {
       from: process.env.MAIL_USER,
       to: email,
-      subject: 'Email Verification',
-      html: `<p>Click the link below to verify your email:</p><p><a href="http://localhost:5173/verify/${token}">Verify Email</a></p>`,
+      subject: 'password reset OTP',
+      html: `<p>Your OTP for password reset is: <b>${otp}</b>. It will expire in 10 minutes.</p>`,
     };
 
     await mailTransporter.sendMail(mailDetails);
-    console.log(`Email sent successfully to ${email}`);
+    console.log(`otp sent successfully to ${email}`);
   } catch (err) {
     console.log('Error sending email:', err.message);
   }
 }
 
-export { verifyEmail };
+export { sendOTPMail };
 
