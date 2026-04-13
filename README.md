@@ -1,16 +1,24 @@
-# React + Vite
+# e-commerce-demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a full-stack e-commerce application with React frontend and Node.js backend.
 
-Currently, two official plugins are available:
+## Frontend (React + Vite)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The frontend is built with React and Vite, providing a modern development experience with HMR and ESLint.
 
-## React Compiler
+## Backend (Node.js)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The backend provides API endpoints for user management, products, and more.
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Install dependencies: `npm install` (in both frontend and backend directories)
+2. Start the backend: `cd backend && npm start`
+3. Start the frontend: `npm run dev`
+
+## Technologies Used
+
+- Frontend: React, Vite, Redux
+- Backend: Node.js, Express, MongoDB
+- Authentication: JWT
+- UI: Tailwind CSS (via shadcn/ui)
