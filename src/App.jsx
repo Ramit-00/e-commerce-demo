@@ -8,18 +8,20 @@ import Verify from './pages/Verify'
 import VerifyEmail from './pages/verifyEmail'
 import Footer from './components/footer'
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import Profile from './pages/profile'
 import ProductPage from './pages/productPage'
+import SingleProduct from './pages/SingleProduct'
 import Cart from './pages/Cart'
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <><Navbar/><Home/><Footer/></>
+    element: <><Navbar/><Sidebar/><Home/><Footer/></>
   },
   {
     path: "/products",
-    element: <><Navbar/><ProductPage/><Footer/></>
+    element: <><Navbar/><Sidebar/><ProductPage/><Footer/></>
   },
   {
     path: "/signin",
@@ -43,11 +45,15 @@ const router = createBrowserRouter([
   },
   {
     path:'/profile',
-    element:<><Navbar/><Profile/></>
+    element:<><Navbar/><Sidebar/><Profile/></>
   },
   {
     path: '/cart',
-    element: <><Navbar/><Cart/></>
+    element: <><Navbar/><Sidebar/><Cart/></>
+  },
+  {
+    path: '/product/:id',
+    element: <><Navbar/><Sidebar/><SingleProduct/><Footer/></>
   }
 ])
 

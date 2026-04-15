@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const {user} = useSelector(store=>store.user)  // Accessing the user state from the Redux store using useSelector hook
+  const { totalItems } = useSelector(store => store.cart)  // Accessing cart state
   const accessToken = localStorage.getItem("accessToken");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -34,13 +35,13 @@ const Navbar = () => {
   return(
     <header className="bg-slate-100 text-slate-900 fixed w-full z-20 border-b border-slate-300 shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition">
           <img src="/e-kart.png" alt="eKart logo" className="h-10 w-auto rounded-lg" />
           <div>
             <h1 className="text-xl font-bold tracking-tight">eKart</h1>
             <p className="text-sm text-slate-600">Smart shopping made easy</p>
           </div>
-        </div>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium">
           <ul className="flex items-center gap-5">
@@ -57,9 +58,11 @@ const Navbar = () => {
           </ul>
           <Link to="/cart" className="relative hover:text-black hover:bg-slate-200 px-3 py-2 rounded transition">
             <ShoppingCart/>
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-              0
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 min-w-[18px] h-[18px] flex items-center justify-center">
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
           </Link>
           <Link >
           {

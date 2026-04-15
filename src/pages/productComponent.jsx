@@ -1,5 +1,9 @@
 import React, { useState } from 'react'
 import { ShoppingCart, Star, Heart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { addToCart } from '../redux/cartSlice'
+import { toast } from 'sonner'
 
 const ProductComponent = ({ 
   id = 1,
@@ -13,6 +17,8 @@ const ProductComponent = ({
   inStock = true,
   badge = 'Sale'
 }) => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
   const [added, setAdded] = useState(false)
@@ -20,7 +26,24 @@ const ProductComponent = ({
   const discount = Math.round(((originalPrice - price) / originalPrice) * 100)
 
   const handleAddToCart = () => {
+    if (!inStock) return
+
+    const product = {
+      id,
+      name,
+      price,
+      image,
+      originalPrice,
+      rating,
+      reviews,
+      description,
+      inStock
+    }
+
+    dispatch(addToCart({ product, quantity }))
     setAdded(true)
+    toast.success(`${name} added to cart!`)
+
     setTimeout(() => setAdded(false), 2000)
   }
 
@@ -83,7 +106,10 @@ const ProductComponent = ({
         </div>
 
         {/* Product Name */}
-        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 hover:text-blue-600 cursor-pointer">
+        <h3 
+          className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 hover:text-blue-600 cursor-pointer transition-colors"
+          onClick={() => navigate(`/product/${id}`)}
+        >
           {name}
         </h3>
 
