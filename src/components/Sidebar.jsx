@@ -1,10 +1,19 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, TrendingUp, Layers, HelpCircle, Home, Package, User, Settings } from 'lucide-react'
+import { Menu, X, TrendingUp, Layers, HelpCircle, Home, Package, User, Settings, ShoppingBag, LogIn, LogOut } from 'lucide-react'
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { toast } from 'sonner'
+import { setUser } from '../redux/userSlice'
 import './Sidebar.css'
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const { user } = useSelector(store => store.user)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const accessToken = localStorage.getItem("accessToken")
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
@@ -12,6 +21,24 @@ const Sidebar = () => {
 
   const closeSidebar = () => {
     setIsOpen(false)
+  }
+
+  const logoutHandler = async () => {
+    try {
+      const res = await axios.post(`http://localhost:8000/api/v1/user/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+      if (res.data.success) {
+        dispatch(setUser(null))
+        toast.success(res.data.message)
+        closeSidebar()
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error("Logout failed")
+    }
   }
 
   const menuItems = [
@@ -37,6 +64,11 @@ const Sidebar = () => {
       path: '/products?sort=trending',
     },
     {
+      icon: <ShoppingBag size={20} />,
+      label: 'Orders & Returns',
+      path: '/orders-and-returns',
+    },
+    {
       icon: <User size={20} />,
       label: 'My Account',
       path: '/profile',
@@ -45,6 +77,15 @@ const Sidebar = () => {
       icon: <Settings size={20} />,
       label: 'Settings',
       path: '/settings',
+    },
+    user ? {
+      icon: <LogOut size={20} />,
+      label: 'Logout',
+      action: logoutHandler,
+    } : {
+      icon: <LogIn size={20} />,
+      label: 'Login',
+      path: '/login',
     },
     {
       icon: <HelpCircle size={20} />,
@@ -104,6 +145,17 @@ const Sidebar = () => {
                       </ul>
                     </details>
                   </div>
+                ) : item.action ? (
+                  <button
+                    onClick={() => {
+                      item.action()
+                      closeSidebar()
+                    }}
+                    className="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-200 transition font-medium text-slate-700 hover:text-black w-full text-left"
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
                 ) : (
                   <Link
                     to={item.path}

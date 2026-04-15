@@ -48,6 +48,7 @@ const Navbar = () => {
             <Link to="/" className="hover:text-black hover:bg-slate-200 px-3 py-2 rounded transition">Home</Link>
 
             <Link to="/products" className="hover:text-black hover:bg-slate-200 px-3 py-2 rounded transition">Products</Link>
+            <Link to="/orders-and-returns" className="hover:text-black hover:bg-slate-200 px-3 py-2 rounded transition">Orders & Returns</Link>
             {
               user && (
                 <Link to="/profile" className="hover:text-black hover:bg-slate-200 px-3 py-2 rounded transition">
